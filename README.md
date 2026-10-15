@@ -1,26 +1,26 @@
-# Navratri Banner Maker + Discord (consent-based)
+# Selfie Camera Frontend
 
-The site creates a greeting banner in the visitor's browser. Discord delivery sends only that PNG after the visitor checks consent and taps Send. Camera, microphone, and location are optional and are never uploaded by this site.
+A mobile-first camera website hosted from this GitHub repository.
 
 ## Website
-GitHub Pages URL: https://yogeshtiwari29186-hash.github.io/descord-/
+GitHub Pages: https://yogeshtiwari29186-hash.github.io/descord-/
 
-## Deploy the Discord Worker
-The Worker code and Wrangler configuration are in `worker.js` and `wrangler.toml`. A GitHub Actions workflow is prepared at **Actions → Deploy Discord Worker**.
+## Current features
+- Requests camera permission only after the visitor taps **Start front camera**.
+- Starts with the front/selfie camera where supported.
+- Lets the visitor switch between front and rear cameras.
+- Captures a photo only when the visitor taps **Take photo**.
+- Shows a preview and offers retake/stop controls.
+- Requires explicit consent before the Discord send action.
+- Stops the camera stream when the visitor stops it or leaves the page.
+- Does not request microphone or location permission and does not silently upload photos.
 
-1. In Cloudflare, create an API token with permission to edit Workers and obtain your Cloudflare Account ID.
-2. In this GitHub repository, open **Settings → Secrets and variables → Actions → New repository secret**. Add:
-   - `CLOUDFLARE_API_TOKEN`
-   - `CLOUDFLARE_ACCOUNT_ID`
-   - `DISCORD_WEBHOOK_URL` — use a newly regenerated Discord webhook. Do not reuse a webhook that was previously shared in chat.
-3. Run **Actions → Deploy Discord Worker → Run workflow**. The workflow deploys the Worker and stores the webhook as a Worker secret; it does not put the webhook in public website code.
-4. Copy the deployed `workers.dev` URL from the workflow log or Cloudflare dashboard. The website's send handler must use that URL followed by `/api/send` instead of the placeholder in `index.html`. The exact workers.dev hostname depends on your Cloudflare account, so it cannot be safely guessed in advance.
-5. Wait for GitHub Pages to publish the updated website and test with the consent checkbox.
+## Discord upload status
+The frontend is committed, but Discord delivery is **not configured yet**. The send handler intentionally has an empty `DISCORD_UPLOAD_ENDPOINT` setting. A private backend is required to keep the Discord webhook secret out of public browser code.
 
-Worker environment:
-- `ALLOWED_ORIGIN` is set in `wrangler.toml` to `https://yogeshtiwari29186-hash.github.io`.
-- `DISCORD_WEBHOOK_URL` is a secret and should never be committed to the repository.
-- Only PNG banners up to 8 MB are accepted; no permanent file storage or database is used.
+Cloudflare API and Account ID are not required for the camera frontend. To enable Discord delivery without Cloudflare, deploy a serverless backend on another host (for example, import this repository into a host that supports serverless functions), configure `DISCORD_WEBHOOK_URL` as a server-side secret, and then set `DISCORD_UPLOAD_ENDPOINT` in `index.html` to that backend's public upload URL. The backend must validate the website origin, accept only image files with a size limit, and forward only a photo the visitor explicitly chose to send.
 
-## Important
-A Discord webhook URL is a private destination credential, not the browser endpoint. Never put it directly into `index.html`; anyone viewing the public source could steal it. Browser permission popups also require the visitor to tap the relevant permission button.
+**Never paste a Discord webhook into `index.html` or any public repository file.** If a webhook was previously shared publicly or in chat, revoke it and create a new one.
+
+## Camera requirements
+Camera access works on HTTPS and requires the visitor's browser permission. Browsers do not allow websites to open a camera secretly or without user interaction.
