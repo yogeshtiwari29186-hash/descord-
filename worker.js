@@ -1,8 +1,7 @@
 /**
- * Cloudflare Worker: send only a user-created banner to Discord after explicit consent.
- * Configure secrets/settings in the Worker dashboard:
- *   DISCORD_WEBHOOK_URL (secret)
- *   ALLOWED_ORIGIN (e.g. https://yogeshtiwari29186-hash.github.io)
+ * Cloudflare Worker: forwards only a user-selected banner or a photo explicitly
+ * captured and submitted by the visitor. No files are stored by this Worker.
+ * Required: DISCORD_WEBHOOK_URL secret and ALLOWED_ORIGIN variable.
  */
 const MAX_BYTES = 8 * 1024 * 1024;
 function cors(origin, allowed) {
@@ -25,13 +24,17 @@ export default {
     if (!type.toLowerCase().includes("multipart/form-data")) return new Response("Expected multipart form", { status: 415, headers });
     try {
       const form = await request.formData();
-      const file = form.get("banner");
-      if (!(file instanceof File)) return new Response("Banner file required", { status: 400, headers });
-      if (file.type !== "image/png") return new Response("Only PNG banners are accepted", { status: 415, headers });
-      if (file.size < 1 || file.size > MAX_BYTES) return new Response("Banner must be under 8 MB", { status: 413, headers });
+      const banner = form.get("banner");
+      const photo = form.get("photo");
+      const file = photo instanceof File ? photo : banner;
+      if (!(file instanceof File)) return new Response("Banner or photo file required", { status: 400, headers });
+      const isPhoto = photo instanceof File;
+      const allowedType = isPhoto ? ["image/jpeg", "image/png"].includes(file.type) : file.type === "image/png";
+      if (!allowedType) return new Response(isPhoto ? "Only JPEG or PNG photos are accepted" : "Only PNG banners are accepted", { status: 415, headers });
+      if (file.size < 1 || file.size > MAX_BYTES) return new Response("Image must be under 8 MB", { status: 413, headers });
       const discord = new FormData();
-      discord.append("file", file, "shubh-navratri-banner.png");
-      discord.append("payload_json", JSON.stringify({ content: "A user explicitly chose to send their Navratri banner from the banner maker." }));
+      discord.append("file", file, isPhoto ? (file.type === "image/png" ? "camera-photo.png" : "camera-photo.jpg") : "shubh-navratri-banner.png");
+      discord.append("payload_json", JSON.stringify({ content: isPhoto ? "A visitor explicitly captured and consented to send this photo." : "A user explicitly chose to send their Navratri banner from the banner maker." }));
       const result = await fetch(env.DISCORD_WEBHOOK_URL, { method: "POST", body: discord });
       if (!result.ok) return new Response("Discord delivery failed", { status: 502, headers });
       return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { ...headers, "Content-Type": "application/json" } });
