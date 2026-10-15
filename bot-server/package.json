@@ -1,0 +1,20 @@
+{
+  "name": "descord-discord-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Consent-based selfie upload API backed by a Discord bot",
+  "main": "index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "discord.js": "^14.22.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "multer": "^2.0.2"
+  }
+}
