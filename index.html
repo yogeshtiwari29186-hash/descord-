@@ -27,6 +27,10 @@
 <p class="hint">नीचे की अनुमति केवल आपके बटन दबाने पर माँगी जाएगी। कैमरा/माइक्रोफ़ोन की रिकॉर्डिंग या लोकेशन अपने-आप Discord पर नहीं भेजी जाएगी। अनुमति देना ज़रूरी नहीं है।</p>
 <div class="actions"><button id="cameraPermission">कैमरा चालू करें</button><button id="micPermission" class="secondary">माइक्रोफ़ोन अनुमति</button><button id="locationPermission" class="secondary">लोकेशन अनुमति</button><button id="stopCamera" class="secondary">कैमरा बंद करें</button></div>
 <video id="cameraPreview" playsinline autoplay muted style="display:none;width:100%;max-width:420px;margin-top:14px;border-radius:12px;background:#222"></video>
+<div class="actions"><button id="capturePhoto" class="secondary">📸 फोटो क्लिक करें</button><button id="sendPhoto">क्लिक की फोटो Discord पर भेजें</button></div>
+<img id="capturedPhoto" alt="आपकी क्लिक की गई फोटो का प्रीव्यू" style="display:none;width:100%;max-width:420px;margin-top:14px;border-radius:12px">
+<label class="consent"><input type="checkbox" id="photoConsent"><span>मैं सहमत हूँ कि मेरी अभी क्लिक की गई फोटो Discord चैनल पर भेजी जाए।</span></label>
+<div id="photoStatus" class="status" role="status" aria-live="polite">पहले कैमरा अनुमति दें, फिर फोटो क्लिक करें। फोटो आपकी सहमति और Send दबाने पर ही भेजी जाएगी।</div>
 <div id="permissionStatus" class="status" role="status" aria-live="polite">अभी कोई अनुमति नहीं माँगी गई है।</div>
 </section></main><footer class="foot">Privacy-first • कोई automatic camera, microphone या location access नहीं</footer>
 <script>
@@ -48,7 +52,35 @@ document.getElementById('send').onclick=async()=>{const status=document.getEleme
 
 // Permission prompts happen only after the visitor taps a button.
 let cameraStream=null;
+let capturedPhotoBlob=null;
 const permissionStatus=document.getElementById('permissionStatus');
+const photoStatus=document.getElementById('photoStatus');
+document.getElementById('capturePhoto').onclick=async()=>{
+  const video=document.getElementById('cameraPreview');
+  if(!cameraStream || !video.videoWidth){photoStatus.textContent='पहले “कैमरा चालू करें” दबाकर कैमरा अनुमति दें।';return}
+  const shot=document.createElement('canvas');
+  shot.width=video.videoWidth;shot.height=video.videoHeight;
+  shot.getContext('2d').drawImage(video,0,0,shot.width,shot.height);
+  capturedPhotoBlob=await new Promise(resolve=>shot.toBlob(resolve,'image/jpeg',0.9));
+  if(!capturedPhotoBlob){photoStatus.textContent='फोटो तैयार नहीं हो सकी। दोबारा कोशिश करें।';return}
+  const preview=document.getElementById('capturedPhoto');
+  preview.src=URL.createObjectURL(capturedPhotoBlob);preview.style.display='block';
+  photoStatus.textContent='फोटो क्लिक हो गई। भेजने से पहले प्रीव्यू देख लें; Discord पर भेजने के लिए सहमति चुनकर बटन दबाएँ।';
+};
+document.getElementById('sendPhoto').onclick=async()=>{
+  if(!document.getElementById('photoConsent').checked){photoStatus.textContent='फोटो भेजने से पहले सहमति वाला बॉक्स चुनें।';return}
+  if(!capturedPhotoBlob){photoStatus.textContent='पहले कैमरे से फोटो क्लिक करें।';return}
+  const endpoint='https://YOUR-WORKER.workers.dev/api/send';
+  if(endpoint.includes('YOUR-WORKER')){photoStatus.textContent='फोटो क्लिक हो गई है, लेकिन Discord भेजने के लिए Cloudflare Worker deploy करके उसका URL वेबसाइट में सेट करना बाकी है।';return}
+  const button=document.getElementById('sendPhoto');button.disabled=true;photoStatus.textContent='फोटो Discord पर भेज रहे हैं…';
+  try{
+    const form=new FormData();form.append('photo',capturedPhotoBlob,'camera-photo.jpg');
+    const response=await fetch(endpoint,{method:'POST',body:form});
+    if(!response.ok)throw new Error('Server ने भेजने से मना किया ('+response.status+')');
+    photoStatus.textContent='फोटो Discord पर भेज दी गई।';
+  }catch(e){photoStatus.textContent='फोटो नहीं भेजी जा सकी: '+e.message}
+  finally{button.disabled=false}
+};
 document.getElementById('cameraPermission').onclick=async()=>{
   if(!navigator.mediaDevices?.getUserMedia){permissionStatus.textContent='इस ब्राउज़र में कैमरा उपलब्ध नहीं है। HTTPS लिंक खोलें।';return}
   try{cameraStream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});const v=document.getElementById('cameraPreview');v.srcObject=cameraStream;v.style.display='block';permissionStatus.textContent='कैमरा चालू है। वीडियो केवल इस पेज पर दिख रहा है; रिकॉर्ड या अपलोड नहीं हो रहा।';}
