@@ -1,108 +1,131 @@
 <!doctype html>
 <html lang="hi">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#7b1022">
-<title>Navratri Banner Maker</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<title>Selfie Camera</title>
 <style>
-:root{--red:#7b1022;--gold:#ffd777;--cream:#fff5dc}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#fff8ee;color:#2b1715}header{background:linear-gradient(120deg,#5e0717,#a91f30);color:white;padding:22px 16px;text-align:center}header h1{margin:0;font-size:clamp(24px,5vw,38px)}header p{margin:8px 0 0;color:#ffe6b5}.wrap{max-width:1000px;margin:20px auto;padding:0 14px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}.panel{background:white;border:1px solid #efd8b0;border-radius:18px;padding:18px;box-shadow:0 8px 24px #5e071710}.panel h2{margin:0 0 14px;color:var(--red);font-size:20px}label{display:block;font-weight:650;margin:12px 0 6px}input,textarea{width:100%;padding:12px;border:1px solid #d9c6b3;border-radius:10px;font:inherit;background:#fffdf9}textarea{resize:vertical;min-height:74px}button{border:0;border-radius:11px;padding:12px 16px;font:700 15px system-ui;cursor:pointer;background:var(--red);color:white}button.secondary{background:#fff0d1;color:#5e0717;border:1px solid #e7c17c}button:disabled{opacity:.55;cursor:not-allowed}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}.preview{width:100%;display:block;border-radius:12px;background:#640b1d}.hint{font-size:13px;color:#6e5a50;line-height:1.5}.consent{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:14px;font-weight:500}.consent input{width:auto;margin-top:4px}.status{margin-top:12px;font-size:14px;white-space:pre-wrap}.foot{text-align:center;padding:5px 16px 28px;color:#705e54;font-size:13px}@media(max-width:760px){.wrap{grid-template-columns:1fr}.panel{padding:14px}}
-.permission-modal{position:fixed;inset:0;z-index:9999;background:#21040ddd;display:flex;align-items:center;justify-content:center;padding:18px}.permission-modal[hidden]{display:none}.permission-card{width:min(100%,520px);background:#fff8ee;border:2px solid #ffd777;border-radius:20px;padding:24px;box-shadow:0 18px 70px #0008}.permission-card h2{color:#7b1022;margin:0 0 10px}.permission-card p{line-height:1.55}.permission-card .actions button{flex:1;min-width:145px}.permission-card .small{font-size:12px;color:#6e5a50}</style></head>
+:root{color-scheme:dark;--bg:#101114;--panel:#1b1d22;--line:#343740;--text:#f7f7fa;--muted:#aeb2bd;--accent:#8b5cf6;--accent2:#6d28d9;--danger:#f87171}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#29203f 0,#101114 45%);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+main{width:min(100%,560px);margin:auto;padding:22px 16px calc(32px + env(safe-area-inset-bottom))}
+.top{display:flex;align-items:center;gap:12px;margin:4px 0 20px}.logo{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#a78bfa,#6d28d9);font-size:24px}.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#c4b5fd;font-weight:800}.top h1{font-size:25px;margin:2px 0 0;letter-spacing:-.03em}.intro{color:var(--muted);margin:0 0 18px;font-size:14px}
+.camera-shell{position:relative;background:#08090b;border:1px solid #383943;border-radius:25px;overflow:hidden;aspect-ratio:3/4;display:grid;place-items:center;box-shadow:0 22px 60px #0007}
+#camera{width:100%;height:100%;object-fit:cover;display:none;transform:scaleX(-1)}#photo{width:100%;height:100%;object-fit:contain;display:none;background:#08090b}
+.empty{padding:30px;text-align:center;color:var(--muted);max-width:300px}.empty .camera-icon{font-size:52px;margin-bottom:10px}.empty strong{display:block;color:#fff;font-size:18px;margin-bottom:7px}
+.live{position:absolute;top:13px;left:13px;background:#0009;border:1px solid #ffffff24;padding:6px 10px;border-radius:99px;font-size:11px;letter-spacing:.08em;display:flex;gap:7px;align-items:center}.dot{width:7px;height:7px;border-radius:50%;background:#a3a3a3}.live.active .dot{background:#4ade80;box-shadow:0 0 10px #4ade80}
+.flip{position:absolute;right:12px;top:12px;width:43px;height:43px;border:1px solid #ffffff30;border-radius:50%;background:#0009;color:white;font-size:20px;display:none}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.btn{border:0;border-radius:14px;min-height:50px;padding:13px 14px;font:700 15px system-ui;cursor:pointer;color:white;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 7px 18px #6d28d933}.btn.secondary{background:#24262d;border:1px solid #3a3d46;box-shadow:none}.btn.full{grid-column:1/-1}.btn:disabled{opacity:.45;cursor:not-allowed}
+.card{margin-top:16px;padding:17px;background:#1b1d22;border:1px solid var(--line);border-radius:19px}.card h2{font-size:17px;margin:0 0 8px}.muted{color:var(--muted);font-size:13px;margin:0}.consent{display:flex;gap:10px;align-items:flex-start;margin:15px 0;font-size:13px;color:#e1e2e8}.consent input{width:19px;height:19px;accent-color:var(--accent);flex:0 0 auto;margin:1px 0 0}.status{font-size:13px;white-space:pre-wrap;margin-top:12px;color:#d4d4d8;min-height:18px}.status.error{color:#fca5a5}.status.ok{color:#86efac}.note{margin-top:14px;font-size:12px;color:#888d99;text-align:center}.hidden{display:none!important}
+</style>
+</head>
 <body>
-<div id="permissionModal" class="permission-modal" role="dialog" aria-modal="true" aria-labelledby="permissionTitle"><div class="permission-card"><h2 id="permissionTitle">🔐 डिवाइस अनुमति</h2><p>कैमरा, माइक्रोफ़ोन या लोकेशन इस्तेमाल करने के लिए नीचे चुनें। हर विकल्प दबाने पर ब्राउज़र अपना अनुमति popup दिखा सकता है। बिना आपकी अनुमति कुछ भी चालू नहीं होगा।</p><div class="actions"><button id="modalCamera">कैमरा अनुमति</button><button id="modalMic" class="secondary">माइक्रोफ़ोन अनुमति</button><button id="modalLocation" class="secondary">लोकेशन अनुमति</button></div><div class="actions"><button id="modalContinue" class="secondary">अभी नहीं — वेबसाइट खोलें</button></div><p class="small">ब्राउज़र सुरक्षा के कारण अनुमति popup अपने-आप नहीं दिखाया जा सकता; संबंधित विकल्प पर टैप करना ज़रूरी है।</p></div></div>
-<header><h1>🌺 शुभ नवरात्रि बैनर मेकर 🌺</h1><p>अपना संदेश लिखें, बैनर बनाएं और PNG डाउनलोड करें</p></header>
-<main class="wrap">
-<section class="panel"><h2>बैनर कस्टमाइज़ करें</h2>
-<label for="name">नाम / दुकान / मंडल</label><input id="name" maxlength="70" value="आप सभी को नवरात्रि की हार्दिक शुभकामनाएँ">
-<label for="message">शुभकामना संदेश</label><textarea id="message" maxlength="180">माँ दुर्गा आपके जीवन में सुख, शांति और समृद्धि लाएँ।</textarea>
-<label for="footer">नीचे की लाइन</label><input id="footer" maxlength="70" value="जय माता दी 🙏">
-<div class="actions"><button id="refresh">बैनर अपडेट करें</button><button class="secondary" id="download">PNG डाउनलोड करें</button></div>
-<p class="hint">यह बैनर आपके ब्राउज़र में बनता है। कोई फोटो/लोकेशन/ऑडियो अपने-आप कैप्चर नहीं होता।</p></section>
-<section class="panel"><h2>बैनर प्रीव्यू</h2><canvas id="poster" class="preview" width="1080" height="1350" aria-label="Navratri banner preview"></canvas>
-<h2 style="margin-top:18px">Discord पर भेजें (वैकल्पिक)</h2>
-<p class="hint">Discord पर केवल यही बनाया हुआ बैनर भेजा जाएगा, और वह भी आपकी अनुमति व Send दबाने पर। पहले server endpoint सेट होना चाहिए।</p>
-<label class="consent"><input type="checkbox" id="consent"><span>मैं सहमत हूँ कि यह बैनर मेरे द्वारा चुने जाने पर Discord चैनल पर भेजा जाए।</span></label>
-<div class="actions"><button id="send">बैनर Discord पर भेजें</button></div><div class="status" id="status" role="status"></div>
-</section>
-<section class="panel" style="grid-column:1/-1"><h2>डिवाइस अनुमति (वैकल्पिक)</h2>
-<p class="hint">नीचे की अनुमति केवल आपके बटन दबाने पर माँगी जाएगी। कैमरा/माइक्रोफ़ोन की रिकॉर्डिंग या लोकेशन अपने-आप Discord पर नहीं भेजी जाएगी। अनुमति देना ज़रूरी नहीं है।</p>
-<div class="actions"><button id="cameraPermission">कैमरा चालू करें</button><button id="micPermission" class="secondary">माइक्रोफ़ोन अनुमति</button><button id="locationPermission" class="secondary">लोकेशन अनुमति</button><button id="stopCamera" class="secondary">कैमरा बंद करें</button></div>
-<video id="cameraPreview" playsinline autoplay muted style="display:none;width:100%;max-width:420px;margin-top:14px;border-radius:12px;background:#222"></video>
-<div class="actions"><button id="capturePhoto" class="secondary">📸 फोटो क्लिक करें</button><button id="sendPhoto">क्लिक की फोटो Discord पर भेजें</button></div>
-<img id="capturedPhoto" alt="आपकी क्लिक की गई फोटो का प्रीव्यू" style="display:none;width:100%;max-width:420px;margin-top:14px;border-radius:12px">
-<label class="consent"><input type="checkbox" id="photoConsent"><span>मैं सहमत हूँ कि मेरी अभी क्लिक की गई फोटो Discord चैनल पर भेजी जाए।</span></label>
-<div id="photoStatus" class="status" role="status" aria-live="polite">पहले कैमरा अनुमति दें, फिर फोटो क्लिक करें। फोटो आपकी सहमति और Send दबाने पर ही भेजी जाएगी।</div>
-<div id="permissionStatus" class="status" role="status" aria-live="polite">अभी कोई अनुमति नहीं माँगी गई है।</div>
-</section></main><footer class="foot">Privacy-first • कोई automatic camera, microphone या location access नहीं</footer>
+<main>
+  <div class="top"><div class="logo" aria-hidden="true">◎</div><div><div class="eyebrow">Private camera</div><h1>Selfie Camera</h1></div></div>
+  <p class="intro">Front camera se photo lo, preview check karo, aur agar chaho to apni photo Discord channel par bhejo.</p>
+  <section class="camera-shell" aria-label="Camera preview">
+    <div class="empty" id="empty"><div class="camera-icon">📷</div><strong>Camera ready hai</strong><span>Start camera dabao. Browser camera permission maangega.</span></div>
+    <video id="camera" autoplay muted playsinline></video>
+    <img id="photo" alt="Captured selfie preview">
+    <div class="live" id="live"><span class="dot"></span><span id="liveText">CAMERA OFF</span></div>
+    <button class="flip" id="flip" aria-label="Switch camera" title="Switch camera">↻</button>
+  </section>
+  <div class="controls">
+    <button class="btn" id="start">Start front camera</button>
+    <button class="btn secondary" id="capture" disabled>Take photo</button>
+    <button class="btn secondary" id="retake" disabled>Retake</button>
+    <button class="btn secondary" id="stop" disabled>Stop camera</button>
+  </div>
+  <section class="card">
+    <h2>Send to Discord</h2>
+    <p class="muted">Photo sirf tab send hogi jab tum consent select karke Send button dabaaoge. Photo automatically upload nahi hoti.</p>
+    <label class="consent"><input id="consent" type="checkbox"><span>Main confirm karta/karti hoon ki maine is photo ko dekha hai aur ise Discord channel par bhejne ke liye razi hoon.</span></label>
+    <button class="btn full" id="send" disabled>Send photo to Discord</button>
+    <div class="status" id="status" role="status" aria-live="polite">Pehle camera start karke photo lo.</div>
+  </section>
+  <p class="note">Camera browser permission ke baad hi chalta hai. Camera stop karne par stream band ho jayegi. Photo capture hone tak kuch upload nahi hota.</p>
+</main>
 <script>
-const canvas=document.getElementById('poster'),ctx=canvas.getContext('2d');
-function wrapText(text,x,y,maxWidth,lineHeight,maxLines){let words=text.split(/\s+/),line='',lines=[];for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word}else line=test}if(line)lines.push(line);lines.slice(0,maxLines).forEach((l,i)=>ctx.fillText(l,x,y+i*lineHeight))}
-function draw(){const w=canvas.width,h=canvas.height;let g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#520617');g.addColorStop(.48,'#a7192c');g.addColorStop(1,'#4d0717');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
-ctx.strokeStyle='#f9d47a';ctx.lineWidth=8;ctx.strokeRect(35,35,w-70,h-70);ctx.lineWidth=2;ctx.strokeRect(52,52,w-104,h-104);
-for(let i=0;i<24;i++){let a=i*Math.PI/12,cx=w/2+Math.cos(a)*360,cy=360+Math.sin(a)*270;ctx.beginPath();ctx.fillStyle=i%2?'#ffd777':'#f7a63c';ctx.arc(cx,cy,7,0,Math.PI*2);ctx.fill()}
-ctx.textAlign='center';ctx.shadowColor='#ffbd50';ctx.shadowBlur=18;ctx.fillStyle='#ffe6a0';ctx.font='bold 94px serif';ctx.fillText('॥ जय माता दी ॥',w/2,180);ctx.shadowBlur=0;
-ctx.fillStyle='#fff3ce';ctx.font='bold 105px serif';ctx.fillText('शुभ नवरात्रि',w/2,345);
-ctx.fillStyle='#ffdc83';ctx.font='bold 42px system-ui';ctx.fillText('🌼 माँ दुर्गा की कृपा 🌼',w/2,425);
-ctx.fillStyle='#fff5df';ctx.font='bold 46px system-ui';wrapText(document.getElementById('name').value,w/2,820,850,65,2);
-ctx.fillStyle='#ffe5b3';ctx.font='38px system-ui';wrapText(document.getElementById('message').value,w/2,940,820,58,3);
-ctx.fillStyle='#ffd777';ctx.font='bold 52px serif';ctx.fillText(document.getElementById('footer').value,w/2,1190);
-ctx.font='26px system-ui';ctx.fillStyle='#fff0d3';ctx.fillText('माँ दुर्गा सबका कल्याण करें',w/2,1250)}
-['name','message','footer'].forEach(id=>document.getElementById(id).addEventListener('input',draw));document.getElementById('refresh').onclick=draw;
-document.getElementById('download').onclick=()=>{const a=document.createElement('a');a.download='shubh-navratri-banner.png';a.href=canvas.toDataURL('image/png');a.click()};
-document.getElementById('send').onclick=async()=>{const status=document.getElementById('status');if(!document.getElementById('consent').checked){status.textContent='पहले सहमति वाले बॉक्स को चुनें।';return}status.textContent='';const endpoint='https://YOUR-WORKER.workers.dev/api/send';if(endpoint.includes('YOUR-WORKER')){status.textContent='Discord भेजने के लिए पहले README में बताए अनुसार Cloudflare Worker deploy करें और इस पेज में endpoint भरें। अभी बैनर डाउनलोड कर सकते हैं।';return}const button=document.getElementById('send');button.disabled=true;status.textContent='भेज रहे हैं…';try{const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));const form=new FormData();form.append('banner',blob,'shubh-navratri-banner.png');const response=await fetch(endpoint,{method:'POST',body:form});if(!response.ok)throw new Error('Server ने भेजने से मना किया ('+response.status+')');status.textContent='बैनर Discord पर भेज दिया गया।';}catch(e){status.textContent='भेजा नहीं जा सका: '+e.message}finally{button.disabled=false}};
+(() => {
+  // Set this to your private backend's public upload endpoint after deploying it.
+  // Never put a Discord webhook URL directly in frontend JavaScript.
+  const DISCORD_UPLOAD_ENDPOINT = "";
+  const video = document.getElementById("camera");
+  const photo = document.getElementById("photo");
+  const empty = document.getElementById("empty");
+  const live = document.getElementById("live");
+  const liveText = document.getElementById("liveText");
+  const startBtn = document.getElementById("start");
+  const captureBtn = document.getElementById("capture");
+  const retakeBtn = document.getElementById("retake");
+  const stopBtn = document.getElementById("stop");
+  const flipBtn = document.getElementById("flip");
+  const sendBtn = document.getElementById("send");
+  const consent = document.getElementById("consent");
+  const status = document.getElementById("status");
+  let stream = null;
+  let capturedBlob = null;
+  let facingMode = "user";
+  let photoUrl = null;
 
-// Permission prompts happen only after the visitor taps a button.
-let cameraStream=null;
-let capturedPhotoBlob=null;
-const permissionStatus=document.getElementById('permissionStatus');
-const photoStatus=document.getElementById('photoStatus');
-document.getElementById('capturePhoto').onclick=async()=>{
-  const video=document.getElementById('cameraPreview');
-  if(!cameraStream || !video.videoWidth){photoStatus.textContent='पहले “कैमरा चालू करें” दबाकर कैमरा अनुमति दें।';return}
-  const shot=document.createElement('canvas');
-  shot.width=video.videoWidth;shot.height=video.videoHeight;
-  shot.getContext('2d').drawImage(video,0,0,shot.width,shot.height);
-  capturedPhotoBlob=await new Promise(resolve=>shot.toBlob(resolve,'image/jpeg',0.9));
-  if(!capturedPhotoBlob){photoStatus.textContent='फोटो तैयार नहीं हो सकी। दोबारा कोशिश करें।';return}
-  const preview=document.getElementById('capturedPhoto');
-  preview.src=URL.createObjectURL(capturedPhotoBlob);preview.style.display='block';
-  photoStatus.textContent='फोटो क्लिक हो गई। भेजने से पहले प्रीव्यू देख लें; Discord पर भेजने के लिए सहमति चुनकर बटन दबाएँ।';
-};
-document.getElementById('sendPhoto').onclick=async()=>{
-  if(!document.getElementById('photoConsent').checked){photoStatus.textContent='फोटो भेजने से पहले सहमति वाला बॉक्स चुनें।';return}
-  if(!capturedPhotoBlob){photoStatus.textContent='पहले कैमरे से फोटो क्लिक करें।';return}
-  const endpoint='https://YOUR-WORKER.workers.dev/api/send';
-  if(endpoint.includes('YOUR-WORKER')){photoStatus.textContent='फोटो क्लिक हो गई है, लेकिन Discord भेजने के लिए Cloudflare Worker deploy करके उसका URL वेबसाइट में सेट करना बाकी है।';return}
-  const button=document.getElementById('sendPhoto');button.disabled=true;photoStatus.textContent='फोटो Discord पर भेज रहे हैं…';
-  try{
-    const form=new FormData();form.append('photo',capturedPhotoBlob,'camera-photo.jpg');
-    const response=await fetch(endpoint,{method:'POST',body:form});
-    if(!response.ok)throw new Error('Server ने भेजने से मना किया ('+response.status+')');
-    photoStatus.textContent='फोटो Discord पर भेज दी गई।';
-  }catch(e){photoStatus.textContent='फोटो नहीं भेजी जा सकी: '+e.message}
-  finally{button.disabled=false}
-};
-document.getElementById('cameraPermission').onclick=async()=>{
-  if(!navigator.mediaDevices?.getUserMedia){permissionStatus.textContent='इस ब्राउज़र में कैमरा उपलब्ध नहीं है। HTTPS लिंक खोलें।';return}
-  try{cameraStream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});const v=document.getElementById('cameraPreview');v.srcObject=cameraStream;v.style.display='block';permissionStatus.textContent='कैमरा चालू है। वीडियो केवल इस पेज पर दिख रहा है; रिकॉर्ड या अपलोड नहीं हो रहा।';}
-  catch(e){permissionStatus.textContent='कैमरा अनुमति नहीं मिली: '+e.message}
-};
-document.getElementById('micPermission').onclick=async()=>{
-  if(!navigator.mediaDevices?.getUserMedia){permissionStatus.textContent='माइक्रोफ़ोन इस ब्राउज़र में उपलब्ध नहीं है। HTTPS लिंक खोलें।';return}
-  let stream;
-  try{stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});permissionStatus.textContent='माइक्रोफ़ोन अनुमति मिल गई। ऑडियो रिकॉर्ड या अपलोड नहीं किया जा रहा।';}
-  catch(e){permissionStatus.textContent='माइक्रोफ़ोन अनुमति नहीं मिली: '+e.message}
-  finally{stream?.getTracks().forEach(track=>track.stop())}
-};
-document.getElementById('locationPermission').onclick=()=>{
-  if(!navigator.geolocation){permissionStatus.textContent='इस ब्राउज़र में लोकेशन सुविधा उपलब्ध नहीं है।';return}
-  permissionStatus.textContent='लोकेशन की अनुमति माँगी जा रही है…';
-  navigator.geolocation.getCurrentPosition(pos=>{permissionStatus.textContent='लोकेशन अनुमति मिल गई। अक्षांश/देशांतर इस पेज पर दिखाए नहीं जा रहे और कहीं भेजे नहीं गए।';},err=>{permissionStatus.textContent='लोकेशन अनुमति/स्थिति उपलब्ध नहीं: '+err.message;},{enableHighAccuracy:false,timeout:10000});
-};
-document.getElementById('stopCamera').onclick=()=>{if(cameraStream){cameraStream.getTracks().forEach(track=>track.stop());cameraStream=null}const v=document.getElementById('cameraPreview');v.srcObject=null;v.style.display='none';permissionStatus.textContent='कैमरा बंद कर दिया गया।'};
-const permissionModal=document.getElementById('permissionModal');
-document.getElementById('modalCamera').addEventListener('click',()=>{permissionModal.hidden=true;document.getElementById('cameraPermission').click()});
-document.getElementById('modalMic').addEventListener('click',()=>{permissionModal.hidden=true;document.getElementById('micPermission').click()});
-document.getElementById('modalLocation').addEventListener('click',()=>{permissionModal.hidden=true;document.getElementById('locationPermission').click()});
-document.getElementById('modalContinue').addEventListener('click',()=>{permissionModal.hidden=true});
-draw();
-</script></body></html>
+  function say(message, type = "") { status.textContent = message; status.className = "status " + type; }
+  function stopCamera() {
+    if (stream) stream.getTracks().forEach(track => track.stop());
+    stream = null; video.srcObject = null; video.style.display = "none";
+    live.classList.remove("active"); liveText.textContent = "CAMERA OFF";
+    empty.classList.remove("hidden"); flipBtn.style.display = "none";
+    captureBtn.disabled = true; stopBtn.disabled = true; startBtn.disabled = false;
+  }
+  async function startCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      say("Camera access ke liye website HTTPS par kholna aur supported browser use karna zaroori hai.", "error"); return;
+    }
+    stopCamera();
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: facingMode }, width: { ideal: 1280 }, height: { ideal: 1600 } }, audio: false });
+      video.srcObject = stream; video.style.display = "block"; photo.style.display = "none"; empty.classList.add("hidden");
+      await video.play();
+      live.classList.add("active"); liveText.textContent = facingMode === "user" ? "FRONT CAMERA ON" : "BACK CAMERA ON";
+      captureBtn.disabled = false; stopBtn.disabled = false; startBtn.disabled = true; flipBtn.style.display = "block";
+      say("Camera on hai. Photo lene ke liye Take photo dabao.");
+    } catch (err) {
+      stopCamera();
+      say(err.name === "NotAllowedError" ? "Camera permission deny hui. Browser settings mein camera allow karke dobara try karo." : "Camera start nahi hua: " + (err.message || err.name), "error");
+    }
+  }
+  startBtn.addEventListener("click", startCamera);
+  stopBtn.addEventListener("click", () => { stopCamera(); say("Camera band kar diya gaya."); });
+  flipBtn.addEventListener("click", async () => { facingMode = facingMode === "user" ? "environment" : "user"; await startCamera(); });
+  captureBtn.addEventListener("click", async () => {
+    if (!stream || !video.videoWidth) { say("Camera abhi ready nahi hai.", "error"); return; }
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    const c = canvas.getContext("2d");
+    if (facingMode === "user") { c.translate(canvas.width, 0); c.scale(-1, 1); }
+    c.drawImage(video, 0, 0, canvas.width, canvas.height);
+    capturedBlob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.9));
+    if (!capturedBlob) { say("Photo capture nahi ho payi. Dobara try karo.", "error"); return; }
+    if (photoUrl) URL.revokeObjectURL(photoUrl);
+    photoUrl = URL.createObjectURL(capturedBlob); photo.src = photoUrl; photo.style.display = "block";
+    video.style.display = "none"; captureBtn.disabled = true; retakeBtn.disabled = false; sendBtn.disabled = !consent.checked;
+    say("Photo capture ho gayi. Preview check karo; send karna optional hai.", "ok");
+  });
+  retakeBtn.addEventListener("click", () => { capturedBlob = null; photo.style.display = "none"; if (stream) video.style.display = "block"; captureBtn.disabled = !stream; retakeBtn.disabled = true; sendBtn.disabled = true; say("Dobara photo le sakte ho."); });
+  consent.addEventListener("change", () => { sendBtn.disabled = !(consent.checked && capturedBlob); });
+  sendBtn.addEventListener("click", async () => {
+    if (!consent.checked || !capturedBlob) { say("Pehle photo capture karo aur consent select karo.", "error"); return; }
+    if (!DISCORD_UPLOAD_ENDPOINT) { say("Camera frontend ready hai, lekin Discord upload backend abhi configured nahi hai. Cloudflare ke bina secure backend deploy karna hoga. Discord webhook ko public code mein nahi rakha gaya.", "error"); return; }
+    sendBtn.disabled = true; say("Photo Discord par bheji ja rahi hai…");
+    try {
+      const data = new FormData(); data.append("photo", capturedBlob, "selfie.jpg");
+      const response = await fetch(DISCORD_UPLOAD_ENDPOINT, { method: "POST", body: data });
+      if (!response.ok) throw new Error("Upload server error (" + response.status + ")");
+      say("Photo Discord channel par send ho gayi.", "ok");
+    } catch (err) { say("Photo send nahi ho saki: " + err.message, "error"); }
+    finally { sendBtn.disabled = !(consent.checked && capturedBlob); }
+  });
+  window.addEventListener("pagehide", stopCamera);
+})();
+</script>
+</body>
+</html>
