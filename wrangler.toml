@@ -2,3 +2,6 @@ name = "descord-banner-discord"
 main = "worker.js"
 compatibility_date = "2026-10-15"
 workers_dev = true
+
+[vars]
+ALLOWED_ORIGIN = "https://yogeshtiwari29186-hash.github.io"
