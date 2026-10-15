@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<title>Selfie Camera</title>
+<style>
+:root{color-scheme:dark;--bg:#101114;--panel:#1b1d22;--line:#343740;--text:#f7f7fa;--muted:#aeb2bd;--accent:#8b5cf6;--accent2:#6d28d9;--danger:#f87171}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#29203f 0,#101114 45%);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+main{width:min(100%,560px);margin:auto;padding:22px 16px calc(32px + env(safe-area-inset-bottom))}
+.top{display:flex;align-items:center;gap:12px;margin:4px 0 20px}.logo{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#a78bfa,#6d28d9);font-size:24px}.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#c4b5fd;font-weight:800}.top h1{font-size:25px;margin:2px 0 0;letter-spacing:-.03em}.intro{color:var(--muted);margin:0 0 18px;font-size:14px}
+.camera-shell{position:relative;background:#08090b;border:1px solid #383943;border-radius:25px;overflow:hidden;aspect-ratio:3/4;display:grid;place-items:center;box-shadow:0 22px 60px #0007}
+#camera{width:100%;height:100%;object-fit:cover;display:none;transform:scaleX(-1)}#photo{width:100%;height:100%;object-fit:contain;display:none;background:#08090b}
+.empty{padding:30px;text-align:center;color:var(--muted);max-width:300px}.empty .camera-icon{font-size:52px;margin-bottom:10px}.empty strong{display:block;color:#fff;font-size:18px;margin-bottom:7px}
+.live{position:absolute;top:13px;left:13px;background:#0009;border:1px solid #ffffff24;padding:6px 10px;border-radius:99px;font-size:11px;letter-spacing:.08em;display:flex;gap:7px;align-items:center}.dot{width:7px;height:7px;border-radius:50%;background:#a3a3a3}.live.active .dot{background:#4ade80;box-shadow:0 0 10px #4ade80}
+.flip{position:absolute;right:12px;top:12px;width:43px;height:43px;border:1px solid #ffffff30;border-radius:50%;background:#0009;color:white;font-size:20px;display:none}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.btn{border:0;border-radius:14px;min-height:50px;padding:13px 14px;font:700 15px system-ui;cursor:pointer;color:white;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 7px 18px #6d28d933}.btn.secondary{background:#24262d;border:1px solid #3a3d46;box-shadow:none}.btn.full{grid-column:1/-1}.btn:disabled{opacity:.45;cursor:not-allowed}
+.card{margin-top:16px;padding:17px;background:#1b1d22;border:1px solid var(--line);border-radius:19px}.card h2{font-size:17px;margin:0 0 8px}.muted{color:var(--muted);font-size:13px;margin:0}.consent{display:flex;gap:10px;align-items:flex-start;margin:15px 0;font-size:13px;color:#e1e2e8}.consent input{width:19px;height:19px;accent-color:var(--accent);flex:0 0 auto;margin:1px 0 0}.status{font-size:13px;white-space:pre-wrap;margin-top:12px;color:#d4d4d8;min-height:18px}.status.error{color:#fca5a5}.status.ok{color:#86efac}.note{margin-top:14px;font-size:12px;color:#888d99;text-align:center}.hidden{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><div class="logo" aria-hidden="true">◎</div><div><div class="eyebrow">Private camera</div><h1>Selfie Camera</h1></div></div>
+  <p class="intro">Front camera se photo lo, preview check karo, aur agar chaho to apni photo Discord channel par bhejo.</p>
+  <section class="camera-shell" aria-label="Camera preview">
+    <div class="empty" id="empty"><div class="camera-icon">📷</div><strong>Camera ready hai</strong><span>Start camera dabao. Browser camera permission maangega.</span></div>
+    <video id="camera" autoplay muted playsinline></video>
+    <img id="photo" alt="Captured selfie preview">
+    <div class="live" id="live"><span class="dot"></span><span id="liveText">CAMERA OFF</span></div>
+    <button class="flip" id="flip" aria-label="Switch camera" title="Switch camera">↻</button>
+  </section>
+  <div class="controls">
+    <button class="btn" id="start">Start front camera</button>
+    <button class="btn secondary" id="capture" disabled>Take photo</button>
+    <button class="btn secondary" id="retake" disabled>Retake</button>
+    <button class="btn secondary" id="stop" disabled>Stop camera</button>
+  </div>
+  <section class="card">
+    <h2>Send to Discord</h2>
+    <p class="muted">Apna Discord webhook URL yahan ek baar paste karo. Yeh is browser ke local storage mein rahega, GitHub code mein nahi. Photo sirf preview aur consent ke baad send hogi.</p>
+    <label for="webhookUrl" class="muted" style="display:block;margin-top:12px">Discord Webhook URL</label>
+    <input id="webhookUrl" type="password" autocomplete="off" placeholder="https://discord.com/api/webhooks/..." style="width:100%;margin-top:7px;padding:13px;border-radius:12px;border:1px solid #454854;background:#101114;color:#fff;font:14px system-ui">
+    <button class="btn secondary full" id="saveWebhook" style="margin-top:9px">Save webhook on this device</button>
+    <label class="consent"><input id="consent" type="checkbox"><span>Main confirm karta/karti hoon ki maine is photo ko dekha hai aur ise Discord channel par bhejne ke liye razi hoon.</span></label>
+    <button class="btn full" id="send" disabled>Send photo to Discord</button>
+    <div class="status" id="status" role="status" aria-live="polite">Pehle camera start karke photo lo.</div>
+  </section>
+  <p class="note">Camera browser permission ke baad hi chalta hai. Camera stop karne par stream band ho jayegi. Photo capture hone tak kuch upload nahi hota.</p>
+</main>
+<script>
+(() => {
+  const video = document.getElementById("camera");
+  const photo = document.getElementById("photo");
+  const empty = document.getElementById("empty");
+  const live = document.getElementById("live");
+  const liveText = document.getElementById("liveText");
+  const startBtn = document.getElementById("start");
+  const captureBtn = document.getElementById("capture");
+  const retakeBtn = document.getElementById("retake");
+  const stopBtn = document.getElementById("stop");
+  const flipBtn = document.getElementById("flip");
+  const sendBtn = document.getElementById("send");
+  const webhookInput = document.getElementById("webhookUrl");
+  const saveWebhookBtn = document.getElementById("saveWebhook");
+  const consent = document.getElementById("consent");
+  const status = document.getElementById("status");
+  // Store the webhook only in this browser on this device; never hard-code it in public source.
+  const WEBHOOK_STORAGE_KEY = "selfieCameraDiscordWebhook";
+  try { webhookInput.value = localStorage.getItem(WEBHOOK_STORAGE_KEY) || ""; } catch (_) {}
+  saveWebhookBtn.addEventListener("click", () => {
+    const value = webhookInput.value.trim();
+    if (!/^https:\/\/(discord\.com|discordapp\.com)\/api\/webhooks\/\d+\/[A-Za-z0-9._-]+$/.test(value)) {
+      say("Valid Discord webhook URL paste karo.", "error");
+      return;
+    }
+    try {
+      localStorage.setItem(WEBHOOK_STORAGE_KEY, value);
+      say("Webhook is device ke browser mein save ho gaya.", "ok");
+    } catch (_) {
+      say("Browser local storage available nahi hai. URL dobara paste karke try karo.", "error");
+    }
+  });
+  let stream = null;
+  let capturedBlob = null;
+  let facingMode = "user";
+  let photoUrl = null;
+
+  function say(message, type = "") { status.textContent = message; status.className = "status " + type; }
+  function stopCamera() {
+    if (stream) stream.getTracks().forEach(track => track.stop());
+    stream = null; video.srcObject = null; video.style.display = "none";
+    live.classList.remove("active"); liveText.textContent = "CAMERA OFF";
+    empty.classList.remove("hidden"); flipBtn.style.display = "none";
+    captureBtn.disabled = true; stopBtn.disabled = true; startBtn.disabled = false;
+  }
+  async function startCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      say("Camera access ke liye website HTTPS par kholna aur supported browser use karna zaroori hai.", "error"); return;
+    }
+    stopCamera();
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: facingMode }, width: { ideal: 1280 }, height: { ideal: 1600 } }, audio: false });
+      video.srcObject = stream; video.style.display = "block"; photo.style.display = "none"; empty.classList.add("hidden");
+      await video.play();
+      live.classList.add("active"); liveText.textContent = facingMode === "user" ? "FRONT CAMERA ON" : "BACK CAMERA ON";
+      captureBtn.disabled = false; stopBtn.disabled = false; startBtn.disabled = true; flipBtn.style.display = "block";
+      say("Camera on hai. Photo lene ke liye Take photo dabao.");
+    } catch (err) {
+      stopCamera();
+      say(err.name === "NotAllowedError" ? "Camera permission deny hui. Browser settings mein camera allow karke dobara try karo." : "Camera start nahi hua: " + (err.message || err.name), "error");
+    }
+  }
+  startBtn.addEventListener("click", startCamera);
+  stopBtn.addEventListener("click", () => { stopCamera(); say("Camera band kar diya gaya."); });
+  flipBtn.addEventListener("click", async () => { facingMode = facingMode === "user" ? "environment" : "user"; await startCamera(); });
+  captureBtn.addEventListener("click", async () => {
+    if (!stream || !video.videoWidth) { say("Camera abhi ready nahi hai.", "error"); return; }
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    const c = canvas.getContext("2d");
+    if (facingMode === "user") { c.translate(canvas.width, 0); c.scale(-1, 1); }
+    c.drawImage(video, 0, 0, canvas.width, canvas.height);
+    capturedBlob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.9));
+    if (!capturedBlob) { say("Photo capture nahi ho payi. Dobara try karo.", "error"); return; }
+    if (photoUrl) URL.revokeObjectURL(photoUrl);
+    photoUrl = URL.createObjectURL(capturedBlob); photo.src = photoUrl; photo.style.display = "block";
+    video.style.display = "none"; captureBtn.disabled = true; retakeBtn.disabled = false; sendBtn.disabled = !consent.checked;
+    say("Photo capture ho gayi. Preview check karo; send karna optional hai.", "ok");
+  });
+  retakeBtn.addEventListener("click", () => { capturedBlob = null; photo.style.display = "none"; if (stream) video.style.display = "block"; captureBtn.disabled = !stream; retakeBtn.disabled = true; sendBtn.disabled = true; say("Dobara photo le sakte ho."); });
+  consent.addEventListener("change", () => { sendBtn.disabled = !(consent.checked && capturedBlob); });
+  sendBtn.addEventListener("click", async () => {
+    if (!consent.checked || !capturedBlob) { say("Pehle photo capture karo aur consent select karo.", "error"); return; }
+    const webhookUrl = webhookInput.value.trim();
+    if (!/^https:\/\/(discord\.com|discordapp\.com)\/api\/webhooks\/\d+\/[A-Za-z0-9._-]+$/.test(webhookUrl)) {
+      say("Pehle apna valid Discord webhook URL paste karke Save webhook dabao.", "error"); return;
+    }
+    sendBtn.disabled = true; say("Photo Discord par bheji ja rahi hai…");
+    try {
+      const data = new FormData();
+      data.append("file", capturedBlob, "selfie.jpg");
+      data.append("payload_json", JSON.stringify({ content: "Photo was sent from Selfie Camera after the user reviewed it and gave consent." }));
+      const response = await fetch(webhookUrl, { method: "POST", body: data });
+      if (!response.ok) throw new Error("Discord webhook error (" + response.status + ")");
+      say("Photo Discord channel par send ho gayi.", "ok");
+    } catch (err) { say("Photo send nahi ho saki. Webhook URL, channel permissions, ya browser network/CORS issue check karo. " + err.message, "error"); }
+    finally { sendBtn.disabled = !(consent.checked && capturedBlob); }
+  });
+  window.addEventListener("pagehide", stopCamera);
+})();
+</script>
+</body>
+</html>
