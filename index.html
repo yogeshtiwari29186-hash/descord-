@@ -49,7 +49,7 @@ main{width:min(100%,560px);margin:auto;padding:22px 16px calc(32px + env(safe-ar
 (() => {
   // Set this to your private backend's public upload endpoint after deploying it.
   // Never put a Discord webhook URL directly in frontend JavaScript.
-  const DISCORD_UPLOAD_ENDPOINT = location.hostname.endsWith(".vercel.app") ? "/api/send" : "";
+  const DISCORD_UPLOAD_ENDPOINT = ""; // After deploying bot-server, set this to https://YOUR-SERVICE.onrender.com/api/send
   const video = document.getElementById("camera");
   const photo = document.getElementById("photo");
   const empty = document.getElementById("empty");
@@ -114,7 +114,7 @@ main{width:min(100%,560px);margin:auto;padding:22px 16px calc(32px + env(safe-ar
   consent.addEventListener("change", () => { sendBtn.disabled = !(consent.checked && capturedBlob); });
   sendBtn.addEventListener("click", async () => {
     if (!consent.checked || !capturedBlob) { say("Pehle photo capture karo aur consent select karo.", "error"); return; }
-    if (!DISCORD_UPLOAD_ENDPOINT) { say("Camera frontend ready hai, lekin Discord upload backend abhi configured nahi hai. Cloudflare ke bina secure backend deploy karna hoga. Discord webhook ko public code mein nahi rakha gaya.", "error"); return; }
+    if (!DISCORD_UPLOAD_ENDPOINT) { say("Discord Bot server abhi connect nahi hai. Bot server deploy karke README ke steps follow karo. Discord bot token website ke code mein nahi rakha gaya.", "error"); return; }
     sendBtn.disabled = true; say("Photo Discord par bheji ja rahi hai…");
     try {
       const data = new FormData(); data.append("photo", capturedBlob, "selfie.jpg");
