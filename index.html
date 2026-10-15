@@ -21,6 +21,12 @@
 <p class="hint">Discord पर केवल यही बनाया हुआ बैनर भेजा जाएगा, और वह भी आपकी अनुमति व Send दबाने पर। पहले server endpoint सेट होना चाहिए।</p>
 <label class="consent"><input type="checkbox" id="consent"><span>मैं सहमत हूँ कि यह बैनर मेरे द्वारा चुने जाने पर Discord चैनल पर भेजा जाए।</span></label>
 <div class="actions"><button id="send">बैनर Discord पर भेजें</button></div><div class="status" id="status" role="status"></div>
+</section>
+<section class="panel" style="grid-column:1/-1"><h2>डिवाइस अनुमति (वैकल्पिक)</h2>
+<p class="hint">नीचे की अनुमति केवल आपके बटन दबाने पर माँगी जाएगी। कैमरा/माइक्रोफ़ोन की रिकॉर्डिंग या लोकेशन अपने-आप Discord पर नहीं भेजी जाएगी। अनुमति देना ज़रूरी नहीं है।</p>
+<div class="actions"><button id="cameraPermission">कैमरा चालू करें</button><button id="micPermission" class="secondary">माइक्रोफ़ोन अनुमति</button><button id="locationPermission" class="secondary">लोकेशन अनुमति</button><button id="stopCamera" class="secondary">कैमरा बंद करें</button></div>
+<video id="cameraPreview" playsinline autoplay muted style="display:none;width:100%;max-width:420px;margin-top:14px;border-radius:12px;background:#222"></video>
+<div id="permissionStatus" class="status" role="status" aria-live="polite">अभी कोई अनुमति नहीं माँगी गई है।</div>
 </section></main><footer class="foot">Privacy-first • कोई automatic camera, microphone या location access नहीं</footer>
 <script>
 const canvas=document.getElementById('poster'),ctx=canvas.getContext('2d');
@@ -38,5 +44,27 @@ ctx.font='26px system-ui';ctx.fillStyle='#fff0d3';ctx.fillText('माँ दु
 ['name','message','footer'].forEach(id=>document.getElementById(id).addEventListener('input',draw));document.getElementById('refresh').onclick=draw;
 document.getElementById('download').onclick=()=>{const a=document.createElement('a');a.download='shubh-navratri-banner.png';a.href=canvas.toDataURL('image/png');a.click()};
 document.getElementById('send').onclick=async()=>{const status=document.getElementById('status');if(!document.getElementById('consent').checked){status.textContent='पहले सहमति वाले बॉक्स को चुनें।';return}status.textContent='';const endpoint='https://YOUR-WORKER.workers.dev/api/send';if(endpoint.includes('YOUR-WORKER')){status.textContent='Discord भेजने के लिए पहले README में बताए अनुसार Cloudflare Worker deploy करें और इस पेज में endpoint भरें। अभी बैनर डाउनलोड कर सकते हैं।';return}const button=document.getElementById('send');button.disabled=true;status.textContent='भेज रहे हैं…';try{const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));const form=new FormData();form.append('banner',blob,'shubh-navratri-banner.png');const response=await fetch(endpoint,{method:'POST',body:form});if(!response.ok)throw new Error('Server ने भेजने से मना किया ('+response.status+')');status.textContent='बैनर Discord पर भेज दिया गया।';}catch(e){status.textContent='भेजा नहीं जा सका: '+e.message}finally{button.disabled=false}};
+
+// Permission prompts happen only after the visitor taps a button.
+let cameraStream=null;
+const permissionStatus=document.getElementById('permissionStatus');
+document.getElementById('cameraPermission').onclick=async()=>{
+  if(!navigator.mediaDevices?.getUserMedia){permissionStatus.textContent='इस ब्राउज़र में कैमरा उपलब्ध नहीं है। HTTPS लिंक खोलें।';return}
+  try{cameraStream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});const v=document.getElementById('cameraPreview');v.srcObject=cameraStream;v.style.display='block';permissionStatus.textContent='कैमरा चालू है। वीडियो केवल इस पेज पर दिख रहा है; रिकॉर्ड या अपलोड नहीं हो रहा।';}
+  catch(e){permissionStatus.textContent='कैमरा अनुमति नहीं मिली: '+e.message}
+};
+document.getElementById('micPermission').onclick=async()=>{
+  if(!navigator.mediaDevices?.getUserMedia){permissionStatus.textContent='माइक्रोफ़ोन इस ब्राउज़र में उपलब्ध नहीं है। HTTPS लिंक खोलें।';return}
+  let stream;
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});permissionStatus.textContent='माइक्रोफ़ोन अनुमति मिल गई। ऑडियो रिकॉर्ड या अपलोड नहीं किया जा रहा।';}
+  catch(e){permissionStatus.textContent='माइक्रोफ़ोन अनुमति नहीं मिली: '+e.message}
+  finally{stream?.getTracks().forEach(track=>track.stop())}
+};
+document.getElementById('locationPermission').onclick=()=>{
+  if(!navigator.geolocation){permissionStatus.textContent='इस ब्राउज़र में लोकेशन सुविधा उपलब्ध नहीं है।';return}
+  permissionStatus.textContent='लोकेशन की अनुमति माँगी जा रही है…';
+  navigator.geolocation.getCurrentPosition(pos=>{permissionStatus.textContent='लोकेशन अनुमति मिल गई। अक्षांश/देशांतर इस पेज पर दिखाए नहीं जा रहे और कहीं भेजे नहीं गए।';},err=>{permissionStatus.textContent='लोकेशन अनुमति/स्थिति उपलब्ध नहीं: '+err.message;},{enableHighAccuracy:false,timeout:10000});
+};
+document.getElementById('stopCamera').onclick=()=>{if(cameraStream){cameraStream.getTracks().forEach(track=>track.stop());cameraStream=null}const v=document.getElementById('cameraPreview');v.srcObject=null;v.style.display='none';permissionStatus.textContent='कैमरा बंद कर दिया गया।'};
 draw();
 </script></body></html>
