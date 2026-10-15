@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: descord-discord-bot
+    runtime: node
+    rootDir: bot-server
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: DISCORD_CHANNEL_ID
+        sync: false
+      - key: ALLOWED_ORIGIN
+        value: https://yogeshtiwari29186-hash.github.io
