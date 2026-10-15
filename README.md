@@ -1,26 +1,30 @@
-# Selfie Camera Frontend
+# Selfie Camera + Discord
 
-A mobile-first camera website hosted from this GitHub repository.
+Mobile-first selfie camera frontend with a consent-based Discord upload endpoint.
 
-## Website
-GitHub Pages: https://yogeshtiwari29186-hash.github.io/descord-/
+## Deploy the website and backend (no Cloudflare API or Account ID)
 
-## Current features
-- Requests camera permission only after the visitor taps **Start front camera**.
-- Starts with the front/selfie camera where supported.
-- Lets the visitor switch between front and rear cameras.
-- Captures a photo only when the visitor taps **Take photo**.
-- Shows a preview and offers retake/stop controls.
-- Requires explicit consent before the Discord send action.
-- Stops the camera stream when the visitor stops it or leaves the page.
-- Does not request microphone or location permission and does not silently upload photos.
+This repository now includes a Vercel serverless endpoint at `api/send.js`. To make camera upload work, deploy the repository on Vercel so the frontend and `/api/send` endpoint run on the same domain.
 
-## Discord upload status
-The frontend is committed, but Discord delivery is **not configured yet**. The send handler intentionally has an empty `DISCORD_UPLOAD_ENDPOINT` setting. A private backend is required to keep the Discord webhook secret out of public browser code.
+1. Open https://vercel.com/new and import `yogeshtiwari29186-hash/descord-` from GitHub.
+2. Deploy the project. After the first deployment, copy the production domain, for example `https://your-project.vercel.app`.
+3. In Vercel, open **Project → Settings → Environment Variables** and add:
+   - `DISCORD_WEBHOOK_URL` = a newly created Discord webhook URL (secret; never put it in frontend code).
+   - `ALLOWED_ORIGIN` = the exact production origin, e.g. `https://your-project.vercel.app` (no trailing slash).
+4. Redeploy after adding the variables.
+5. Open the Vercel production URL, allow the camera, take a photo, check consent, and tap **Send photo to Discord**.
 
-Cloudflare API and Account ID are not required for the camera frontend. To enable Discord delivery without Cloudflare, deploy a serverless backend on another host (for example, import this repository into a host that supports serverless functions), configure `DISCORD_WEBHOOK_URL` as a server-side secret, and then set `DISCORD_UPLOAD_ENDPOINT` in `index.html` to that backend's public upload URL. The backend must validate the website origin, accept only image files with a size limit, and forward only a photo the visitor explicitly chose to send.
+The frontend detects a `.vercel.app` domain and sends to the same-origin `/api/send` route. The GitHub Pages URL below is only the static camera frontend; Discord upload will show a backend-not-configured message there until a serverless backend is deployed and its endpoint is configured.
 
-**Never paste a Discord webhook into `index.html` or any public repository file.** If a webhook was previously shared publicly or in chat, revoke it and create a new one.
+## GitHub Pages frontend
+https://yogeshtiwari29186-hash.github.io/descord-/
 
-## Camera requirements
-Camera access works on HTTPS and requires the visitor's browser permission. Browsers do not allow websites to open a camera secretly or without user interaction.
+## Privacy and security
+- The camera starts only after the visitor taps the start button and accepts the browser permission prompt.
+- A photo is captured only when the visitor taps **Take photo**.
+- The photo is sent only after the visitor checks consent and taps **Send photo to Discord**.
+- The server accepts only one JPEG/PNG photo up to 8 MB and forwards it to the configured Discord webhook without permanent file storage.
+- The server checks the configured website origin and keeps the webhook in a server-side environment variable.
+- Do not commit or share a Discord webhook. If an old webhook was pasted into chat or a public file, revoke it and create a new one.
+
+Camera access requires HTTPS and the visitor's explicit browser permission.
