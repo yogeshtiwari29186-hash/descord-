@@ -50,23 +50,6 @@ main{width:min(100%,560px);margin:auto;padding:22px 16px calc(32px + env(safe-ar
 </main>
 <script>
 (() => {
-  // The webhook URL is entered by the owner on their own device and is not hard-coded in this public page.
-  // Anyone with access to this device/browser profile may still be able to use the saved webhook.
-  const WEBHOOK_STORAGE_KEY = "selfieCameraDiscordWebhook";
-  try { webhookInput.value = localStorage.getItem(WEBHOOK_STORAGE_KEY) || ""; } catch (_) {}
-  saveWebhookBtn.addEventListener("click", () => {
-    const value = webhookInput.value.trim();
-    if (!/^https:\/\/(discord\.com|discordapp\.com)\/api\/webhooks\/\d+\/[A-Za-z0-9._-]+$/.test(value)) {
-      say("Valid Discord webhook URL paste karo.", "error");
-      return;
-    }
-    try {
-      localStorage.setItem(WEBHOOK_STORAGE_KEY, value);
-      say("Webhook is device ke browser mein save ho gaya.", "ok");
-    } catch (_) {
-      say("Browser local storage available nahi hai. URL dobara paste karke try karo.", "error");
-    }
-  });
   const video = document.getElementById("camera");
   const photo = document.getElementById("photo");
   const empty = document.getElementById("empty");
@@ -82,6 +65,22 @@ main{width:min(100%,560px);margin:auto;padding:22px 16px calc(32px + env(safe-ar
   const saveWebhookBtn = document.getElementById("saveWebhook");
   const consent = document.getElementById("consent");
   const status = document.getElementById("status");
+  // Store the webhook only in this browser on this device; never hard-code it in public source.
+  const WEBHOOK_STORAGE_KEY = "selfieCameraDiscordWebhook";
+  try { webhookInput.value = localStorage.getItem(WEBHOOK_STORAGE_KEY) || ""; } catch (_) {}
+  saveWebhookBtn.addEventListener("click", () => {
+    const value = webhookInput.value.trim();
+    if (!/^https:\/\/(discord\.com|discordapp\.com)\/api\/webhooks\/\d+\/[A-Za-z0-9._-]+$/.test(value)) {
+      say("Valid Discord webhook URL paste karo.", "error");
+      return;
+    }
+    try {
+      localStorage.setItem(WEBHOOK_STORAGE_KEY, value);
+      say("Webhook is device ke browser mein save ho gaya.", "ok");
+    } catch (_) {
+      say("Browser local storage available nahi hai. URL dobara paste karke try karo.", "error");
+    }
+  });
   let stream = null;
   let capturedBlob = null;
   let facingMode = "user";
