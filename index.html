@@ -49,7 +49,7 @@ main{width:min(100%,560px);margin:auto;padding:22px 16px calc(32px + env(safe-ar
 (() => {
   // Set this to your private backend's public upload endpoint after deploying it.
   // Never put a Discord webhook URL directly in frontend JavaScript.
-  const DISCORD_UPLOAD_ENDPOINT = "";
+  const DISCORD_UPLOAD_ENDPOINT = location.hostname.endsWith(".vercel.app") ? "/api/send" : "";
   const video = document.getElementById("camera");
   const photo = document.getElementById("photo");
   const empty = document.getElementById("empty");
