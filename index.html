@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#7b1022">
+<title>Navratri Banner Maker</title>
+<style>
+:root{--red:#7b1022;--gold:#ffd777;--cream:#fff5dc}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#fff8ee;color:#2b1715}header{background:linear-gradient(120deg,#5e0717,#a91f30);color:white;padding:22px 16px;text-align:center}header h1{margin:0;font-size:clamp(24px,5vw,38px)}header p{margin:8px 0 0;color:#ffe6b5}.wrap{max-width:1000px;margin:20px auto;padding:0 14px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}.panel{background:white;border:1px solid #efd8b0;border-radius:18px;padding:18px;box-shadow:0 8px 24px #5e071710}.panel h2{margin:0 0 14px;color:var(--red);font-size:20px}label{display:block;font-weight:650;margin:12px 0 6px}input,textarea{width:100%;padding:12px;border:1px solid #d9c6b3;border-radius:10px;font:inherit;background:#fffdf9}textarea{resize:vertical;min-height:74px}button{border:0;border-radius:11px;padding:12px 16px;font:700 15px system-ui;cursor:pointer;background:var(--red);color:white}button.secondary{background:#fff0d1;color:#5e0717;border:1px solid #e7c17c}button:disabled{opacity:.55;cursor:not-allowed}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}.preview{width:100%;display:block;border-radius:12px;background:#640b1d}.hint{font-size:13px;color:#6e5a50;line-height:1.5}.consent{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:14px;font-weight:500}.consent input{width:auto;margin-top:4px}.status{margin-top:12px;font-size:14px;white-space:pre-wrap}.foot{text-align:center;padding:5px 16px 28px;color:#705e54;font-size:13px}@media(max-width:760px){.wrap{grid-template-columns:1fr}.panel{padding:14px}}
+</style></head>
+<body>
+<header><h1>🌺 शुभ नवरात्रि बैनर मेकर 🌺</h1><p>अपना संदेश लिखें, बैनर बनाएं और PNG डाउनलोड करें</p></header>
+<main class="wrap">
+<section class="panel"><h2>बैनर कस्टमाइज़ करें</h2>
+<label for="name">नाम / दुकान / मंडल</label><input id="name" maxlength="70" value="आप सभी को नवरात्रि की हार्दिक शुभकामनाएँ">
+<label for="message">शुभकामना संदेश</label><textarea id="message" maxlength="180">माँ दुर्गा आपके जीवन में सुख, शांति और समृद्धि लाएँ।</textarea>
+<label for="footer">नीचे की लाइन</label><input id="footer" maxlength="70" value="जय माता दी 🙏">
+<div class="actions"><button id="refresh">बैनर अपडेट करें</button><button class="secondary" id="download">PNG डाउनलोड करें</button></div>
+<p class="hint">यह बैनर आपके ब्राउज़र में बनता है। कोई फोटो/लोकेशन/ऑडियो अपने-आप कैप्चर नहीं होता।</p></section>
+<section class="panel"><h2>बैनर प्रीव्यू</h2><canvas id="poster" class="preview" width="1080" height="1350" aria-label="Navratri banner preview"></canvas>
+<h2 style="margin-top:18px">Discord पर भेजें (वैकल्पिक)</h2>
+<p class="hint">Discord पर केवल यही बनाया हुआ बैनर भेजा जाएगा, और वह भी आपकी अनुमति व Send दबाने पर। पहले server endpoint सेट होना चाहिए।</p>
+<label class="consent"><input type="checkbox" id="consent"><span>मैं सहमत हूँ कि यह बैनर मेरे द्वारा चुने जाने पर Discord चैनल पर भेजा जाए।</span></label>
+<div class="actions"><button id="send">बैनर Discord पर भेजें</button></div><div class="status" id="status" role="status"></div>
+</section></main><footer class="foot">Privacy-first • कोई automatic camera, microphone या location access नहीं</footer>
+<script>
+const canvas=document.getElementById('poster'),ctx=canvas.getContext('2d');
+function wrapText(text,x,y,maxWidth,lineHeight,maxLines){let words=text.split(/\s+/),line='',lines=[];for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word}else line=test}if(line)lines.push(line);lines.slice(0,maxLines).forEach((l,i)=>ctx.fillText(l,x,y+i*lineHeight))}
+function draw(){const w=canvas.width,h=canvas.height;let g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#520617');g.addColorStop(.48,'#a7192c');g.addColorStop(1,'#4d0717');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+ctx.strokeStyle='#f9d47a';ctx.lineWidth=8;ctx.strokeRect(35,35,w-70,h-70);ctx.lineWidth=2;ctx.strokeRect(52,52,w-104,h-104);
+for(let i=0;i<24;i++){let a=i*Math.PI/12,cx=w/2+Math.cos(a)*360,cy=360+Math.sin(a)*270;ctx.beginPath();ctx.fillStyle=i%2?'#ffd777':'#f7a63c';ctx.arc(cx,cy,7,0,Math.PI*2);ctx.fill()}
+ctx.textAlign='center';ctx.shadowColor='#ffbd50';ctx.shadowBlur=18;ctx.fillStyle='#ffe6a0';ctx.font='bold 94px serif';ctx.fillText('॥ जय माता दी ॥',w/2,180);ctx.shadowBlur=0;
+ctx.fillStyle='#fff3ce';ctx.font='bold 105px serif';ctx.fillText('शुभ नवरात्रि',w/2,345);
+ctx.fillStyle='#ffdc83';ctx.font='bold 42px system-ui';ctx.fillText('🌼 माँ दुर्गा की कृपा 🌼',w/2,425);
+ctx.fillStyle='#fff5df';ctx.font='bold 46px system-ui';wrapText(document.getElementById('name').value,w/2,820,850,65,2);
+ctx.fillStyle='#ffe5b3';ctx.font='38px system-ui';wrapText(document.getElementById('message').value,w/2,940,820,58,3);
+ctx.fillStyle='#ffd777';ctx.font='bold 52px serif';ctx.fillText(document.getElementById('footer').value,w/2,1190);
+ctx.font='26px system-ui';ctx.fillStyle='#fff0d3';ctx.fillText('माँ दुर्गा सबका कल्याण करें',w/2,1250)}
+['name','message','footer'].forEach(id=>document.getElementById(id).addEventListener('input',draw));document.getElementById('refresh').onclick=draw;
+document.getElementById('download').onclick=()=>{const a=document.createElement('a');a.download='shubh-navratri-banner.png';a.href=canvas.toDataURL('image/png');a.click()};
+document.getElementById('send').onclick=async()=>{const status=document.getElementById('status');if(!document.getElementById('consent').checked){status.textContent='पहले सहमति वाले बॉक्स को चुनें।';return}status.textContent='';const endpoint='https://YOUR-WORKER.workers.dev/api/send';if(endpoint.includes('YOUR-WORKER')){status.textContent='Discord भेजने के लिए पहले README में बताए अनुसार Cloudflare Worker deploy करें और इस पेज में endpoint भरें। अभी बैनर डाउनलोड कर सकते हैं।';return}const button=document.getElementById('send');button.disabled=true;status.textContent='भेज रहे हैं…';try{const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));const form=new FormData();form.append('banner',blob,'shubh-navratri-banner.png');const response=await fetch(endpoint,{method:'POST',body:form});if(!response.ok)throw new Error('Server ने भेजने से मना किया ('+response.status+')');status.textContent='बैनर Discord पर भेज दिया गया।';}catch(e){status.textContent='भेजा नहीं जा सका: '+e.message}finally{button.disabled=false}};
+draw();
+</script></body></html>
